@@ -2,8 +2,12 @@ Munitions From Scratch
 ======================
 
 
-IRC
-+++
+`Git`_
+++++++
+
+
+`IRC`_
+++++++
 
 
 `ChatZilla`_
@@ -21,4 +25,11 @@ Auto-perform @ Lists @ freenode
 - ``/join #librecrops``
 
 
+`GPG`_
+++++++
+
+
+.. _Git: https://git-scm.com/
+.. _IRC: https://en.wikipedia.org/wiki/Internet_Relay_Chat
 .. _ChatZilla: http://chatzilla.hacksrus.com/
+.. _GPG: https://en.wikipedia.org/wiki/GNU_Privacy_Guard
