@@ -13,6 +13,8 @@ Contents:
 
       如何获得机器的帮助 <dead-help.rst>
       如何寻求人类的帮助 <live-help.rst>
+      SSH 的基本应用 <ssh.rst>
+      IRC 的基本应用 <irc.rst>
       GPG 的基本应用 <gpg.rst>
 
 
@@ -20,5 +22,4 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
