@@ -11,11 +11,8 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-      如何获得机器的帮助 <dead-help.rst>
-      如何寻求人类的帮助 <live-help.rst>
-      SSH 的基本应用 <ssh.rst>
-      IRC 的基本应用 <irc.rst>
-      GPG 的基本应用 <gpg.rst>
+      基本帮助 <help.rst>
+      基本应用 <using.rst>
 
 
 Indices and tables
