@@ -19,11 +19,14 @@ Linux Rootkit 系列二：基于修改 `sys_call_table`_ 的系统调用挂钩
 代码仓库： https://github.com/NoviceLive/research-rootkit 。
 代码在最新的 64 比特 Arch_ 与 Kali_ 上面测试正常。
 
-测试建议：如果读者使用 tmux_ 或者类似的工具，
+测试建议： **不要在物理机测试！不要在物理机测试！不要在物理机测试！**
+
+如果读者使用 tmux_ 或者类似的工具，
 则可以垂直分割你的终端窗口，
 一个窗口开一个 ``sudo dmesg -C && dmesg -w`` ，用于查看日志；
 另一个窗口用来做其他操作，比如构建、加载内核模块。
 不用 tmux_ 也没关系，开两个终端，各占半个屏幕。
+
 
 第一部分：基于修改 `sys_call_table`_ 的系统调用挂钩
 ---------------------------------------------------
@@ -53,7 +56,7 @@ Linux Rootkit 系列二：基于修改 `sys_call_table`_ 的系统调用挂钩
 笔者决定采用从内核起始地址开始暴力搜索内存空间的方案。
 （ **但是这种方案有可能被欺骗** 。）
 
-其他可能的方案有，一，从 /boot/System.map 中读取，
+其他可能的方案有，一，从 `/boot/System.map`_ 中读取，
 感兴趣的读者可以查阅
 `Hooking the Linux System Call Table`_ ，
 这篇文章便是使用这种方案来获取 `sys_call_table`_ 的地址的。
@@ -226,23 +229,23 @@ Linux Rootkit 系列二：基于修改 `sys_call_table`_ 的系统调用挂钩
 
 简单处理，直接打印路径名。
 
-   ::
+::
 
-      asmlinkage long
-      fake_unlink(const char __user *pathname)
-      {
-        printk(KERN_ALERT "unlink: %s\n", pathname);
+   asmlinkage long
+   fake_unlink(const char __user *pathname)
+   {
+     printk(KERN_ALERT "unlink: %s\n", pathname);
 
-        return real_unlink(pathname);
-      }
+     return real_unlink(pathname);
+   }
 
-      asmlinkage long
-      fake_unlinkat(int dfd, const char __user * pathname, int flag)
-      {
-        printk(KERN_ALERT "unlinkat: %s\n", pathname);
+   asmlinkage long
+   fake_unlinkat(int dfd, const char __user * pathname, int flag)
+   {
+     printk(KERN_ALERT "unlinkat: %s\n", pathname);
 
-        return real_unlinkat(dfd, pathname, flag);
-      }
+     return real_unlinkat(dfd, pathname, flag);
+   }
 
 3. 测试我们的文件监视工具
 +++++++++++++++++++++++++
@@ -275,6 +278,7 @@ Linux Rootkit 系列二：基于修改 `sys_call_table`_ 的系统调用挂钩
 .. _Hooking the Linux System Call Table: https://tnichols.org/2015/10/19/Hooking-the-Linux-System-Call-Table/
 .. _Kernel-Land Rootkits: http://www.kernelhacking.com/rodrigo/docs/StMichael/kernel-land-rootkits.pdf
 
+.. _/boot/System.map: https://en.wikipedia.org/wiki/System.map
 .. _LKM: https://en.wikipedia.org/wiki/Loadable_kernel_module
 .. _ABI: https://en.wikipedia.org/wiki/Application_binary_interface
 .. _CR0: https://en.wikipedia.org/wiki/Control_register#CR0
