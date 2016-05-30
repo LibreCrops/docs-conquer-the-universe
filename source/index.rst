@@ -13,6 +13,7 @@ Contents:
 
       基本帮助 <help.rst>
       基本应用 <using.rst>
+      Linux Rootkit <rootkit.rst>
 
 
 Indices and tables
