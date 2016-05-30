@@ -222,7 +222,7 @@ Linux Rootkit 系列二：基于修改 `sys_call_table`_ 的系统调用挂钩
      return real_open(filename, flags, mode);
    }
 
-   注：这里的 `strcmp`_ 也是内核提供的。
+注：这里的 `strcmp`_ 也是内核提供的。
 
 2. `sys_unlink`_ 与 `sys_unlinkat`_ 的钩子函数： ``fake_unlink`` 与 ``fake_unlinkat``
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
