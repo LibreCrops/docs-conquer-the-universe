@@ -13,7 +13,7 @@
 地址
 ----
 
-前往 http://docs-conquer-the-universe.readthedocs.org/en/latest/。
+前往 http://docs-conquer-the-universe.readthedocs.io/。
 
 
 说明
