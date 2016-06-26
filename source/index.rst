@@ -9,11 +9,11 @@ Welcome to Docs Conquer The Universe's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
       基本帮助 <help.rst>
       基本应用 <using.rst>
-      Linux Rootkit <rootkit.rst>
+      Linux Rootkit 研究 <rootkit.rst>
 
 
 Indices and tables
