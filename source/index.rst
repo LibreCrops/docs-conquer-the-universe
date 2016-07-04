@@ -14,7 +14,6 @@ Contents:
       基本帮助 <help.rst>
       基本应用 <using.rst>
       Linux Rootkit 研究 <rootkit.rst>
-      2 <2.rst>
 
 
 Indices and tables
