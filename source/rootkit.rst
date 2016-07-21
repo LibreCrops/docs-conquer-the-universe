@@ -4,6 +4,8 @@ Linux Rootkit 研究
 Linux Rootkit 系列二：基于修改 `sys_call_table`_ 的系统调用挂钩
 ===============================================================
 
+**最后修改时间** ：待记录。
+
 rectigu@gmail.com, 二〇一六年五月。
 
 **FreeBuf 链接** ： http://www.freebuf.com/sectool/105713.html 。
@@ -320,6 +322,8 @@ rectigu@gmail.com, 二〇一六年五月。
 Linux Rootkit 系列三：实例详解 Rootkit 必备的基本功能
 =====================================================
 
+**最后修改时间** ： **2016-07-20 CST** 。
+
 rectigu@gmail.com, 二〇一六年六月。
 
 **FreeBuf 链接** ： http://www.freebuf.com/articles/system/107829.html 。
@@ -530,13 +534,15 @@ Remote Code Execution / 远程代码执行
 （尤其是反 Rootkit 程序与 **其他** 不良 Rootkit）在内核态执行。
 当然，理想是艰巨的，所以我们先做点容易的，控制内核模块的加载。
 
+**2016-07-20 CST 更新** ： **独自霸占内核态的理想错误的，
+Rootkit 强调的是后门（隐蔽）属性，不是霸道（嚣张）** 。
+
 控制内核模块的加载，我们可以从通知链机制下手。
 通知链的详细工作机制读者可以查看参考资料；
 简单来讲，当某个子系统或者模块发生某个事件时，
 该子系统主动遍历某个链表，
 而这个链表中记录着其他子系统或者模块注册的事件处理函数，
 通过传递恰当的参数调用这个处理函数达到事件通知的目的。
-
 
 具体来说，我们注册一个模块通知处理函数，
 在模块完成加载之后、开始初始化之前，
@@ -1370,9 +1376,11 @@ Rootkit。要实现这个目标，
 Linux Rootkit 系列五：感染系统关键内核模块实现持久化
 ====================================================
 
+**最后修改时间** ： **2016-07-21 CST** 。
+
 rectigu@gmail.com, 二〇一六年七月。
 
-**FreeBuf 链接** ： TBD 。
+**FreeBuf 链接** ： http://www.freebuf.com/articles/system/109034.html 。
 
 前言
 ----
@@ -1816,7 +1824,7 @@ Rootkit 的内核模块可以寄生到这些模块上，实现实现隐蔽持久
 
 .. image:: images/video.png
 
-如果测试正常，那么我们可以用被感染的模块替换调原来的那个健康的模块了。
+如果测试正常，那么我们可以用被感染的模块替换掉原来的那个健康的模块了。
 
 ::
 
@@ -2259,14 +2267,14 @@ ELF 头部有两种， 即 ``Elf32_Ehdr`` （32 比特 ELF 文件头部）
 1. 参考资料
 +++++++++++
 
-- Infecting loadable kernel modules: kernel versions 2.6.x/3.0.x, http://phrack.org/issues/68/11.html#article
-- Tool Interface Standard (TIS) Executable and Linking Format (ELF) Specification Version 1.2, http://refspecs.linuxbase.org/elf/elf.pdf
+- `Infecting loadable kernel modules: kernel versions 2.6.x/3.0.x <http://phrack.org/issues/68/11.html#article>`_
+- `Tool Interface Standard (TIS) Executable and Linking Format (ELF) Specification Version 1.2 <http://refspecs.linuxbase.org/elf/elf.pdf>`_
 
 2. 延伸阅读
 +++++++++++
 
-- Infecting Loadable Kernel Modules, http://phrack.org/issues/61/10.html#article
-- Static Kernel Patching, http://phrack.org/issues/60/8.html#article
+- `Infecting Loadable Kernel Modules <http://phrack.org/issues/61/10.html#article>`_
+- `Static Kernel Patching <http://phrack.org/issues/60/8.html#article>`_
 
 
 如有错误疏忽，欢迎纠正补充；
