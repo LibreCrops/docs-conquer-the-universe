@@ -3,10 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Docs Conquer The Universe's documentation!
-=====================================================
+LibreCrops 中文文档项目
+=======================
 
-Contents:
+**目录** ：
 
 .. toctree::
    :maxdepth: 4
@@ -14,10 +14,3 @@ Contents:
       基本帮助 <help.rst>
       基本应用 <using.rst>
       Linux Rootkit 研究 <rootkit.rst>
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
