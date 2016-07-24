@@ -48,7 +48,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'LibreCrops 中文文档项目'
+project = u'LibreCrops 中文文档项目'
 copyright = '2016, Gu Zhengxiong'
 author = 'Gu Zhengxiong'
 
@@ -66,7 +66,7 @@ release = '0.2.0-git'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'zh_CN'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
