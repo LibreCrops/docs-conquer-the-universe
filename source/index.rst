@@ -9,8 +9,8 @@ LibreCrops 中文文档项目
 **目录** ：
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: -1
 
-      基本帮助 <help.rst>
-      基本应用 <using.rst>
-      Linux Rootkit 研究 <rootkit.rst>
+   help
+   using
+   gnu_linux
